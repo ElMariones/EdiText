@@ -35,8 +35,6 @@ const openBtn = byId<HTMLButtonElement>("open-btn");
 const saveBtn = byId<HTMLButtonElement>("save-btn");
 const copyBtn = byId<HTMLButtonElement>("copy-btn");
 const clearBtn = byId<HTMLButtonElement>("clear-btn");
-const oneLinerBtn = byId<HTMLButtonElement>("oneliner-btn");
-
 const fileInput = byId<HTMLInputElement>("file-input");
 
 const sidebar = byId<HTMLElement>("sidebar");
@@ -641,8 +639,6 @@ sidebarToggle.addEventListener("click", () => {
   setSidebarCollapsed(!panelPrefs.sidebarCollapsed);
 });
 sidebarScrim.addEventListener("click", closeSidebarDrawer);
-
-oneLinerBtn.addEventListener("click", toggleOneLinerPanel);
 
 /* ------------------------------------------------------------------ */
 /* Theme (day / night)                                                 */

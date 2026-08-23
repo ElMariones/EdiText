@@ -26,8 +26,8 @@
             if (p && typeof p.style === "string") a.style = p.style;
             if (p && typeof p.tone === "string") a.tone = p.tone;
           }
-          d.dataset.style = a.style;
-          d.dataset.tone = a.tone;
+          if (a.style !== "basic") d.dataset.style = a.style;
+          if (a.tone !== "cream") d.dataset.tone = a.tone;
         } catch (e) {}
       })();
     </script>
@@ -97,17 +97,10 @@
           <button type="button" class="tool" id="aspect-btn" title="Aspect" aria-label="Choose aspect" aria-haspopup="true" aria-expanded="false">
             <span class="ic" data-icon="palette"></span>
           </button>
-
-          <span class="toolbar-sep" role="presentation"></span>
-
-          <button type="button" class="tool tool-primary" id="oneliner-btn" title="Text → One-Liner (⌘⇧L)">
-            <span class="ic" data-icon="oneliner"></span>
-            <span class="tool-primary-label">One-Liner</span>
-          </button>
         </nav>
 
         <div class="aspect-menu glass" id="aspect-menu" hidden>
-          <div class="aspect-group">
+          <div class="aspect-group aspect-group-tones">
             <span class="aspect-label">Tone</span>
             <div class="aspect-options" id="tone-options">
               <button type="button" class="aspect-option" data-tone="cream">Cream</button>

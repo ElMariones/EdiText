@@ -720,7 +720,7 @@ body.dragging .drop-overlay {
 }
 
 .sidebar-toggle {
-  display: inline-flex;
+  display: none; /* the in-column toggle covers desktop; this only opens the mobile drawer */
 }
 
 .sidebar-scrim {
@@ -1857,6 +1857,10 @@ body.dragging .drop-overlay {
     transform: translateX(0);
   }
 
+  .sidebar-toggle {
+    display: inline-flex;
+  }
+
   .sidebar-scrim {
     display: block;
     position: fixed;
@@ -1978,6 +1982,7 @@ body.dragging .drop-overlay {
 
   .sidebar.collapsed .sidebar-title,
   .sidebar.collapsed .sidebar-new,
+  .sidebar.collapsed .doc-list,
   .oneliner-panel.collapsed .sidebar-title,
   .oneliner-panel.collapsed .ol-pane,
   .oneliner-panel.collapsed .ol-copy {
@@ -1988,6 +1993,11 @@ body.dragging .drop-overlay {
   .oneliner-panel.collapsed .col-toggle .ic {
     transform: rotate(180deg);
   }
+}
+
+/* Tones are only selectable in the basic style. */
+[data-style] .aspect-group-tones {
+  display: none;
 }
 
 /* ---------- Reduced motion ---------- */
