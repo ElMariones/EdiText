@@ -174,14 +174,14 @@ textarea:focus-visible {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  width: min(100% - 32px, 1120px);
+  width: min(100% - 24px, 1600px);
   margin-inline: auto;
 }
 
 .body {
   flex: 1;
   display: flex;
-  gap: 18px;
+  gap: 12px;
   min-height: 0;
 }
 
@@ -200,7 +200,7 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding-block: 28px 20px;
+  padding-block: 20px 14px;
 }
 
 .brand {
@@ -355,7 +355,7 @@ textarea:focus-visible {
 #editor {
   flex: 1;
   width: 100%;
-  padding: 26px 30px;
+  padding: 20px 24px;
   border: none;
   resize: none;
   background: transparent;
@@ -492,13 +492,17 @@ body.dragging .drop-overlay {
 /* ---------- Sidebar ---------- */
 
 .sidebar {
-  width: 252px;
+  width: 240px;
   flex: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius-lg);
   padding: 10px;
+  transition:
+    width 280ms var(--ease-out),
+    padding 280ms var(--ease-out),
+    opacity 220ms var(--ease-out);
 }
 
 .sidebar-head {
@@ -610,11 +614,53 @@ body.dragging .drop-overlay {
 }
 
 .sidebar-toggle {
-  display: none;
+  display: inline-flex;
 }
 
 .sidebar-scrim {
   display: none;
+}
+
+/* ---------- One-Liner panel (right column) ---------- */
+
+.oneliner-panel {
+  width: 300px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  transition:
+    width 280ms var(--ease-out),
+    padding 280ms var(--ease-out),
+    opacity 220ms var(--ease-out);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 2px 0;
+}
+
+.panel-hide {
+  height: 30px;
+  min-width: 30px;
+  border-radius: 9px;
+  margin: -4px -6px 0 0;
+}
+
+.oneliner-panel .ol-pane {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.oneliner-panel .ol-pane textarea {
+  flex: 1;
+  min-height: 80px;
 }
 
 /* ---------- Overlays & modals ---------- */
@@ -644,60 +690,6 @@ body.dragging .drop-overlay {
   transition: opacity 260ms var(--ease-out);
 }
 
-.modal {
-  width: min(920px, 100%);
-  max-height: min(88dvh, 780px);
-  overflow: auto;
-  overscroll-behavior: contain;
-  border-radius: 26px;
-  padding: 24px 26px 26px;
-  background: var(--surface-raised);
-  box-shadow: var(--shadow-float);
-  opacity: 0;
-  transform: translateY(16px) scale(0.985);
-  transition:
-    opacity 280ms var(--ease-modal),
-    transform 280ms var(--ease-modal);
-}
-
-.overlay.open .modal {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.modal-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.modal-heading h2 {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--ink-strong);
-}
-
-.modal-heading p {
-  margin-top: 3px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.modal-head .tool {
-  margin: -4px -6px 0 0;
-}
-
-/* Input / result panes */
-
-.ol-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 16px;
-}
-
 .ol-pane {
   display: flex;
   flex-direction: column;
@@ -716,8 +708,8 @@ body.dragging .drop-overlay {
 
 .ol-pane textarea {
   flex: 1;
-  min-height: 190px;
-  padding: 14px 16px;
+  min-height: 130px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-hairline);
   background: var(--surface-inner);
@@ -1108,7 +1100,7 @@ body.dragging .drop-overlay {
 
 @media (max-width: 720px) {
   .app {
-    width: min(100% - 24px, 1120px);
+    width: min(100% - 24px, 1600px);
   }
 
   .header {
@@ -1136,10 +1128,6 @@ body.dragging .drop-overlay {
 
   .sidebar.open {
     transform: translateX(0);
-  }
-
-  .sidebar-toggle {
-    display: inline-flex;
   }
 
   .sidebar-scrim {
@@ -1221,18 +1209,22 @@ body.dragging .drop-overlay {
     align-items: end;
   }
 
-  .modal {
-    max-height: calc(100dvh - 24px);
-    padding: 18px 16px 20px;
+  .oneliner-panel {
+    width: auto;
+    margin-top: 12px;
+    min-height: 0;
   }
 
-  .ol-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+  .oneliner-panel.collapsed {
+    display: none;
+  }
+
+  .oneliner-panel .ol-pane {
+    flex: 0 0 auto;
   }
 
   .ol-pane textarea {
-    min-height: 150px;
+    min-height: 120px;
     font-size: 16px; /* prevents iOS focus zoom */
   }
 
@@ -1241,9 +1233,19 @@ body.dragging .drop-overlay {
   }
 }
 
-@media (min-width: 721px) and (max-width: 900px) {
-  .ol-grid {
-    grid-template-columns: 1fr 1fr;
+@media (min-width: 721px) {
+  .sidebar.collapsed {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .oneliner-panel.collapsed {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
   }
 }
 

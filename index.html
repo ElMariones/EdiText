@@ -58,9 +58,8 @@
             type="button"
             class="tool sidebar-toggle"
             id="sidebar-toggle"
-            title="Documents"
-            aria-label="Show documents"
-            aria-expanded="false"
+            title="Toggle documents"
+            aria-label="Toggle documents"
           >
             <span class="ic" data-icon="docs"></span>
           </button>
@@ -150,43 +149,41 @@
             >
           </p>
         </div>
+
+        <aside class="oneliner-panel glass" id="oneliner-panel" aria-label="One-Liner converter">
+          <div class="panel-head">
+            <span class="sidebar-title">One-Liner</span>
+            <button
+              type="button"
+              class="tool panel-hide"
+              id="ol-hide-btn"
+              title="Hide panel (⌘⇧L)"
+              aria-label="Hide one-liner panel"
+            >
+              <span class="ic" data-icon="x"></span>
+            </button>
+          </div>
+
+          <section class="ol-pane">
+            <label for="ol-input">Paste text</label>
+            <textarea id="ol-input" placeholder="Paste your multiline text here…" spellcheck="false"></textarea>
+          </section>
+
+          <section class="ol-pane ol-pane-result">
+            <label for="ol-output">Result</label>
+            <textarea id="ol-output" readonly placeholder="One-liner…"></textarea>
+            <button type="button" class="btn btn-quiet" id="ol-copy">
+              <span class="ic ic-inline" data-icon="copy"></span>
+              Copy result
+            </button>
+          </section>
+        </aside>
       </div>
     </div>
 
     <div class="sidebar-scrim" id="sidebar-scrim" aria-hidden="true"></div>
 
     <input type="file" id="file-input" accept=".txt,text/plain" hidden />
-
-    <!-- One-Liner modal -->
-    <div class="overlay" id="ol-overlay" hidden>
-      <section class="modal glass" role="dialog" aria-modal="true" aria-labelledby="ol-title" aria-describedby="ol-subtitle">
-        <header class="modal-head">
-          <div class="modal-heading">
-            <h2 id="ol-title">Text → One-Liner</h2>
-            <p id="ol-subtitle">Remove line breaks while preserving spaces and text.</p>
-          </div>
-          <button type="button" class="tool" id="ol-close" title="Close (Esc)" aria-label="Close one-liner window">
-            <span class="ic" data-icon="x"></span>
-          </button>
-        </header>
-
-        <div class="ol-grid">
-          <section class="ol-pane">
-            <label for="ol-input">Input</label>
-            <textarea id="ol-input" placeholder="Paste your multiline text here…" spellcheck="false"></textarea>
-          </section>
-
-          <section class="ol-pane ol-pane-result">
-            <label for="ol-output">Result</label>
-            <textarea id="ol-output" readonly placeholder="Your one-liner will appear here…"></textarea>
-            <button type="button" class="btn btn-quiet" id="ol-copy">
-              <span class="ic ic-inline" data-icon="copy"></span>
-              Copy result
-            </button>
-          </section>
-        </div>
-      </section>
-    </div>
 
     <!-- Confirm dialog -->
     <div class="overlay overlay-confirm" id="confirm-overlay" hidden>

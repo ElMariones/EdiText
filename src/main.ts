@@ -45,8 +45,8 @@ const sidebarScrim = byId<HTMLDivElement>("sidebar-scrim");
 const newDocBtn = byId<HTMLButtonElement>("new-doc-btn");
 const docList = byId<HTMLUListElement>("doc-list");
 
-const olOverlay = byId<HTMLDivElement>("ol-overlay");
-const olClose = byId<HTMLButtonElement>("ol-close");
+const onelinerPanel = byId<HTMLElement>("oneliner-panel");
+const olHideBtn = byId<HTMLButtonElement>("ol-hide-btn");
 const olInput = byId<HTMLTextAreaElement>("ol-input");
 const olOutput = byId<HTMLTextAreaElement>("ol-output");
 const olCopy = byId<HTMLButtonElement>("ol-copy");
@@ -472,7 +472,6 @@ function closeLayer(layer: HTMLElement, restoreFocus = true): void {
 
 function anyOpenLayer(): HTMLElement | null {
   if (!confirmOverlay.hidden) return confirmOverlay;
-  if (!olOverlay.hidden) return olOverlay;
   return null;
 }
 
@@ -493,15 +492,11 @@ function trapFocus(layer: HTMLElement, e: KeyboardEvent): void {
 }
 
 /* ------------------------------------------------------------------ */
-/* One-Liner modal                                                     */
+/* One-Liner panel                                                     */
 /* ------------------------------------------------------------------ */
 
 function runConversion(): void {
   olOutput.value = toOneLiner(olInput.value);
-}
-
-function openOneLiner(): void {
-  openLayer(olOverlay, olInput);
 }
 
 olInput.addEventListener("input", runConversion);
@@ -514,12 +509,6 @@ olCopy.addEventListener("click", async () => {
   const ok = await copyToClipboard(olOutput.value);
   if (ok) toast("Copied");
   else toast("Unable to copy automatically. Select the result and copy it manually.", true);
-});
-
-olClose.addEventListener("click", () => closeLayer(olOverlay));
-
-olOverlay.addEventListener("mousedown", (e) => {
-  if (e.target === olOverlay) closeLayer(olOverlay);
 });
 
 /* ------------------------------------------------------------------ */
@@ -555,8 +544,45 @@ window.addEventListener("blur", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/* Sidebar drawer (mobile)                                             */
+/* Retractable columns (sidebar left / one-liner right)                */
 /* ------------------------------------------------------------------ */
+
+interface PanelPrefs {
+  sidebarCollapsed: boolean;
+  onelinerCollapsed: boolean;
+}
+
+const PANEL_KEY = "editext.panels.v1";
+let panelPrefs: PanelPrefs = { sidebarCollapsed: false, onelinerCollapsed: false };
+
+function loadPanelPrefs(): PanelPrefs {
+  try {
+    const raw = localStorage.getItem(PANEL_KEY);
+    if (raw) {
+      const p = JSON.parse(raw) as Partial<PanelPrefs>;
+      return {
+        sidebarCollapsed: !!p.sidebarCollapsed,
+        onelinerCollapsed: !!p.onelinerCollapsed,
+      };
+    }
+  } catch {
+    /* noop */
+  }
+  return { sidebarCollapsed: false, onelinerCollapsed: false };
+}
+
+function savePanelPrefs(): void {
+  try {
+    localStorage.setItem(PANEL_KEY, JSON.stringify(panelPrefs));
+  } catch {
+    /* noop */
+  }
+}
+
+function applyPanelState(): void {
+  sidebar.classList.toggle("collapsed", panelPrefs.sidebarCollapsed);
+  onelinerPanel.classList.toggle("collapsed", panelPrefs.onelinerCollapsed);
+}
 
 function openSidebarDrawer(): void {
   if (!drawerQuery.matches) return;
@@ -575,10 +601,27 @@ function closeSidebarDrawer(): void {
 }
 
 sidebarToggle.addEventListener("click", () => {
-  if (sidebar.classList.contains("open")) closeSidebarDrawer();
-  else openSidebarDrawer();
+  if (drawerQuery.matches) {
+    if (sidebar.classList.contains("open")) closeSidebarDrawer();
+    else openSidebarDrawer();
+    return;
+  }
+  panelPrefs.sidebarCollapsed = !panelPrefs.sidebarCollapsed;
+  savePanelPrefs();
+  applyPanelState();
 });
 sidebarScrim.addEventListener("click", closeSidebarDrawer);
+
+function toggleOneLinerPanel(): void {
+  const wasCollapsed = panelPrefs.onelinerCollapsed;
+  panelPrefs.onelinerCollapsed = !wasCollapsed;
+  savePanelPrefs();
+  applyPanelState();
+  if (wasCollapsed) olInput.focus();
+}
+
+olHideBtn.addEventListener("click", toggleOneLinerPanel);
+oneLinerBtn.addEventListener("click", toggleOneLinerPanel);
 
 /* ------------------------------------------------------------------ */
 /* Theme (day / night)                                                 */
@@ -625,7 +668,6 @@ clearBtn.addEventListener("click", () => void clearCurrentDocument());
 openBtn.addEventListener("click", () => fileInput.click());
 saveBtn.addEventListener("click", saveFile);
 copyBtn.addEventListener("click", () => void copyAll());
-oneLinerBtn.addEventListener("click", openOneLiner);
 
 editor.addEventListener("input", onEditorChanged);
 
@@ -647,11 +689,8 @@ document.addEventListener("keydown", (e) => {
       closeSidebarDrawer();
       return;
     }
-    const layer = anyOpenLayer();
-    if (layer === confirmOverlay) {
+    if (!confirmOverlay.hidden) {
       settleConfirm(false);
-    } else if (layer === olOverlay) {
-      closeLayer(olOverlay);
     }
     return;
   }
@@ -673,7 +712,7 @@ document.addEventListener("keydown", (e) => {
     createDocument();
   } else if (key === "l" && e.shiftKey) {
     e.preventDefault();
-    if (olOverlay.hidden) openOneLiner();
+    toggleOneLinerPanel();
   }
 });
 
@@ -685,6 +724,8 @@ window.addEventListener("beforeunload", flushAutosave);
 
 injectIcons();
 applyTheme(currentTheme(), false);
+panelPrefs = loadPanelPrefs();
+applyPanelState();
 updateStats();
 
 const loaded = loadDocs();

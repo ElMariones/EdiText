@@ -5,9 +5,10 @@ EdiText is a minimalist plain-text editor for `.txt` files with one signature ex
 ## Features
 
 - **Minimal plain-text editor** — a distraction-free writing surface. No fonts, no formatting, no clutter.
-- **Documents sidebar** — every draft and opened file is kept in a sidebar (a slide-in drawer on mobile); switch between them instantly, and each one autosaves independently.
+- **Three-column layout** — the editor sits centered between a **documents sidebar** on the left and a **One-Liner panel** on the right. Both side columns are retractable (toolbar toggles, the panel's ✕, or <kbd>⌘/Ctrl ⇧ L</kbd>) and remember their state.
+- **Documents sidebar** — every draft and opened file is kept on the left (a slide-in drawer on mobile); switch between them instantly, and each one autosaves independently.
 - **Live statistics** — lines · words · characters, updated on every keystroke.
-- **One-Liner converter** — paste multiline text, get it back as one line automatically as you type (handles `\r\n`, `\r`, `\n`, and blank-line runs). Opens from the toolbar or <kbd>⌘/Ctrl ⇧ L</kbd>.
+- **One-Liner panel** — paste multiline text on the right, get it back as one line automatically as you type (handles `\r\n`, `\r`, `\n`, and blank-line runs), then copy the result.
 - **Day / night mode** — a toolbar toggle switches between warm light and dark themes; your preference is remembered.
 - **Open & save `.txt`** — everything happens locally via the File API and Blob downloads.
 - **Drag & drop** — drop a `.txt` file anywhere on the page to open it.
@@ -21,8 +22,8 @@ EdiText is a minimalist plain-text editor for `.txt` files with one signature ex
 | --- | --- |
 | <kbd>⌘/Ctrl</kbd> + <kbd>S</kbd> | Download the document as `.txt` |
 | <kbd>⌘/Ctrl</kbd> + <kbd>N</kbd> | Create a new document |
-| <kbd>⌘/Ctrl</kbd> + <kbd>⇧</kbd> + <kbd>L</kbd> | Open the One-Liner converter |
-| <kbd>Esc</kbd> | Close the modal / cancel confirmation |
+| <kbd>⌘/Ctrl</kbd> + <kbd>⇧</kbd> + <kbd>L</kbd> | Show / hide the One-Liner panel |
+| <kbd>Esc</kbd> | Close the documents drawer / cancel confirmation |
 | <kbd>⌘/Ctrl</kbd> + <kbd>A/C/X/V/Z</kbd> | Native select, copy, cut, paste, undo |
 
 ## Run locally
@@ -58,7 +59,7 @@ EdiText/
 ├── index.html                     # App markup (single page)
 ├── public/favicon.svg             # Brand mark
 ├── src/
-│   ├── main.ts                    # App wiring: editor, modals, shortcuts, DnD
+│   ├── main.ts                    # App wiring: editor, panels, shortcuts, DnD
 │   ├── convert.ts                 # Text → One-Liner transformation
 │   ├── stats.ts                   # Lines / words / characters counters
 │   ├── storage.ts                 # localStorage draft persistence
