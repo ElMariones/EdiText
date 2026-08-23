@@ -12,12 +12,22 @@
     <title>EdiText</title>
     <script>
       (function () {
+        var d = document.documentElement;
         try {
           var t = localStorage.getItem("editext.theme");
           if (t !== "dark" && t !== "light") {
             t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
           }
-          document.documentElement.dataset.theme = t;
+          d.dataset.theme = t;
+          var a = { style: "basic", tone: "cream" };
+          var raw = localStorage.getItem("editext.aspect.v1");
+          if (raw) {
+            var p = JSON.parse(raw);
+            if (p && typeof p.style === "string") a.style = p.style;
+            if (p && typeof p.tone === "string") a.tone = p.tone;
+          }
+          d.dataset.style = a.style;
+          d.dataset.tone = a.tone;
         } catch (e) {}
       })();
     </script>
@@ -84,6 +94,9 @@
           <button type="button" class="tool" id="theme-btn" title="Switch to dark mode" aria-label="Switch to dark mode">
             <span class="ic" data-icon="moon"></span>
           </button>
+          <button type="button" class="tool" id="aspect-btn" title="Aspect" aria-label="Choose aspect" aria-haspopup="true" aria-expanded="false">
+            <span class="ic" data-icon="palette"></span>
+          </button>
 
           <span class="toolbar-sep" role="presentation"></span>
 
@@ -92,11 +105,43 @@
             <span class="tool-primary-label">One-Liner</span>
           </button>
         </nav>
+
+        <div class="aspect-menu glass" id="aspect-menu" hidden>
+          <div class="aspect-group">
+            <span class="aspect-label">Tone</span>
+            <div class="aspect-options" id="tone-options">
+              <button type="button" class="aspect-option" data-tone="cream">Cream</button>
+              <button type="button" class="aspect-option" data-tone="blue">Blue</button>
+              <button type="button" class="aspect-option" data-tone="green">Green</button>
+              <button type="button" class="aspect-option" data-tone="red">Red</button>
+              <button type="button" class="aspect-option" data-tone="white">White</button>
+            </div>
+          </div>
+          <div class="aspect-group">
+            <span class="aspect-label">Style</span>
+            <div class="aspect-options aspect-options-styles" id="style-options">
+              <button type="button" class="aspect-option" data-style-opt="basic">Basic</button>
+              <button type="button" class="aspect-option" data-style-opt="cyberpunk">Cyberpunk</button>
+              <button type="button" class="aspect-option" data-style-opt="win98">Windows 98</button>
+              <button type="button" class="aspect-option" data-style-opt="paper">Paper</button>
+              <button type="button" class="aspect-option" data-style-opt="console">Console</button>
+            </div>
+          </div>
+        </div>
       </header>
 
       <div class="body">
         <aside class="sidebar glass" id="sidebar" aria-label="Documents">
           <div class="sidebar-head">
+            <button
+              type="button"
+              class="tool col-toggle"
+              id="sidebar-col-toggle"
+              title="Collapse documents"
+              aria-label="Collapse documents"
+            >
+              <span class="ic" data-icon="chevronsLeft"></span>
+            </button>
             <span class="sidebar-title">Documents</span>
             <button
               type="button"
@@ -155,12 +200,12 @@
             <span class="sidebar-title">One-Liner</span>
             <button
               type="button"
-              class="tool panel-hide"
-              id="ol-hide-btn"
-              title="Hide panel (⌘⇧L)"
-              aria-label="Hide one-liner panel"
+              class="tool col-toggle"
+              id="panel-col-toggle"
+              title="Collapse one-liner"
+              aria-label="Collapse one-liner panel"
             >
-              <span class="ic" data-icon="x"></span>
+              <span class="ic" data-icon="chevronsRight"></span>
             </button>
           </div>
 

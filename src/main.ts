@@ -41,15 +41,19 @@ const fileInput = byId<HTMLInputElement>("file-input");
 
 const sidebar = byId<HTMLElement>("sidebar");
 const sidebarToggle = byId<HTMLButtonElement>("sidebar-toggle");
+const sidebarColToggle = byId<HTMLButtonElement>("sidebar-col-toggle");
 const sidebarScrim = byId<HTMLDivElement>("sidebar-scrim");
 const newDocBtn = byId<HTMLButtonElement>("new-doc-btn");
 const docList = byId<HTMLUListElement>("doc-list");
 
 const onelinerPanel = byId<HTMLElement>("oneliner-panel");
-const olHideBtn = byId<HTMLButtonElement>("ol-hide-btn");
+const panelColToggle = byId<HTMLButtonElement>("panel-col-toggle");
 const olInput = byId<HTMLTextAreaElement>("ol-input");
 const olOutput = byId<HTMLTextAreaElement>("ol-output");
 const olCopy = byId<HTMLButtonElement>("ol-copy");
+
+const aspectBtn = byId<HTMLButtonElement>("aspect-btn");
+const aspectMenu = byId<HTMLDivElement>("aspect-menu");
 
 const confirmOverlay = byId<HTMLDivElement>("confirm-overlay");
 const confirmTitle = byId<HTMLElement>("confirm-title");
@@ -584,6 +588,23 @@ function applyPanelState(): void {
   onelinerPanel.classList.toggle("collapsed", panelPrefs.onelinerCollapsed);
 }
 
+function setSidebarCollapsed(collapsed: boolean): void {
+  panelPrefs.sidebarCollapsed = collapsed;
+  savePanelPrefs();
+  applyPanelState();
+}
+
+function setOneLinerCollapsed(collapsed: boolean): void {
+  panelPrefs.onelinerCollapsed = collapsed;
+  savePanelPrefs();
+  applyPanelState();
+  if (!collapsed) olInput.focus();
+}
+
+function toggleOneLinerPanel(): void {
+  setOneLinerCollapsed(!panelPrefs.onelinerCollapsed);
+}
+
 function openSidebarDrawer(): void {
   if (!drawerQuery.matches) return;
   sidebar.classList.add("open");
@@ -600,27 +621,27 @@ function closeSidebarDrawer(): void {
   sidebarToggle.setAttribute("aria-expanded", "false");
 }
 
+// In-column toggle buttons (collapse/expand within the column itself).
+sidebarColToggle.addEventListener("click", () => {
+  if (drawerQuery.matches) {
+    closeSidebarDrawer();
+    return;
+  }
+  setSidebarCollapsed(!panelPrefs.sidebarCollapsed);
+});
+panelColToggle.addEventListener("click", () => setOneLinerCollapsed(!panelPrefs.onelinerCollapsed));
+
+// Toolbar toggles.
 sidebarToggle.addEventListener("click", () => {
   if (drawerQuery.matches) {
     if (sidebar.classList.contains("open")) closeSidebarDrawer();
     else openSidebarDrawer();
     return;
   }
-  panelPrefs.sidebarCollapsed = !panelPrefs.sidebarCollapsed;
-  savePanelPrefs();
-  applyPanelState();
+  setSidebarCollapsed(!panelPrefs.sidebarCollapsed);
 });
 sidebarScrim.addEventListener("click", closeSidebarDrawer);
 
-function toggleOneLinerPanel(): void {
-  const wasCollapsed = panelPrefs.onelinerCollapsed;
-  panelPrefs.onelinerCollapsed = !wasCollapsed;
-  savePanelPrefs();
-  applyPanelState();
-  if (wasCollapsed) olInput.focus();
-}
-
-olHideBtn.addEventListener("click", toggleOneLinerPanel);
 oneLinerBtn.addEventListener("click", toggleOneLinerPanel);
 
 /* ------------------------------------------------------------------ */
@@ -659,6 +680,134 @@ themeBtn.addEventListener("click", () => {
 });
 
 /* ------------------------------------------------------------------ */
+/* Aspect (tones + styles)                                             */
+/* ------------------------------------------------------------------ */
+
+const ASPECT_KEY = "editext.aspect.v1";
+const TONES = ["cream", "blue", "green", "red", "white"];
+const STYLES = ["basic", "cyberpunk", "win98", "paper", "console"];
+let tone = "cream";
+let style = "basic";
+
+interface AspectPrefs {
+  style: string;
+  tone: string;
+}
+
+function saveAspectPrefs(): void {
+  try {
+    localStorage.setItem(ASPECT_KEY, JSON.stringify({ style, tone }));
+  } catch {
+    /* noop */
+  }
+}
+
+function loadAspectPrefs(): AspectPrefs {
+  try {
+    const raw = localStorage.getItem(ASPECT_KEY);
+    if (raw) {
+      const p = JSON.parse(raw) as Partial<AspectPrefs>;
+      return {
+        style: typeof p.style === "string" && STYLES.includes(p.style) ? p.style : "basic",
+        tone: typeof p.tone === "string" && TONES.includes(p.tone) ? p.tone : "cream",
+      };
+    }
+  } catch {
+    /* noop */
+  }
+  return { style: "basic", tone: "cream" };
+}
+
+/** Sync the tone + style onto <html> (attrs are pre-set by the head script). */
+function applyAspectState(): void {
+  const root = document.documentElement;
+  if (tone === "cream") delete root.dataset.tone;
+  else root.dataset.tone = tone;
+  if (style === "basic") delete root.dataset.style;
+  else root.dataset.style = style;
+  themeBtn.disabled = style !== "basic"; // styles are fixed looks
+  markAspectActive();
+}
+
+function setTone(id: string): void {
+  tone = TONES.includes(id) ? id : "cream";
+  saveAspectPrefs();
+  applyAspectState();
+}
+
+function setStyle(id: string): void {
+  style = STYLES.includes(id) ? id : "basic";
+  saveAspectPrefs();
+  applyAspectState();
+}
+
+function ensureCheck(el: HTMLElement): void {
+  if (!el.querySelector(".check")) {
+    const check = document.createElement("span");
+    check.className = "check ic";
+    check.innerHTML = icons.check!;
+    el.appendChild(check);
+  }
+}
+
+function markAspectActive(): void {
+  for (const el of aspectMenu.querySelectorAll<HTMLElement>("[data-tone]")) {
+    const id = el.getAttribute("data-tone") ?? "";
+    const active = id === tone;
+    el.classList.toggle("active", active);
+    el.setAttribute("aria-pressed", String(active));
+    ensureCheck(el);
+  }
+  for (const el of aspectMenu.querySelectorAll<HTMLElement>("[data-style-opt]")) {
+    const id = el.getAttribute("data-style-opt") ?? "";
+    const active = id === style;
+    el.classList.toggle("active", active);
+    el.setAttribute("aria-pressed", String(active));
+    ensureCheck(el);
+  }
+}
+
+for (const el of aspectMenu.querySelectorAll<HTMLElement>("[data-tone]")) {
+  el.addEventListener("click", () => {
+    setTone(el.getAttribute("data-tone") ?? "cream");
+    closeAspectMenu();
+  });
+}
+
+for (const el of aspectMenu.querySelectorAll<HTMLElement>("[data-style-opt]")) {
+  el.addEventListener("click", () => {
+    setStyle(el.getAttribute("data-style-opt") ?? "basic");
+    closeAspectMenu();
+  });
+}
+
+function openAspectMenu(): void {
+  aspectMenu.hidden = false;
+  void aspectMenu.offsetWidth;
+  aspectMenu.classList.add("open");
+  aspectBtn.setAttribute("aria-expanded", "true");
+  markAspectActive();
+}
+
+function closeAspectMenu(): void {
+  aspectMenu.classList.remove("open");
+  setTimeout(() => {
+    aspectMenu.hidden = true;
+  }, 200);
+  aspectBtn.setAttribute("aria-expanded", "false");
+}
+
+aspectBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (aspectMenu.hidden) openAspectMenu();
+  else closeAspectMenu();
+});
+
+document.addEventListener("click", (e) => {
+  if (!aspectMenu.hidden && !aspectMenu.contains(e.target as Node)) closeAspectMenu();
+});
+
+/* ------------------------------------------------------------------ */
 /* Toolbar wiring                                                      */
 /* ------------------------------------------------------------------ */
 
@@ -685,6 +834,10 @@ document.addEventListener("keydown", (e) => {
   const meta = e.metaKey || e.ctrlKey;
 
   if (e.key === "Escape") {
+    if (!aspectMenu.hidden) {
+      closeAspectMenu();
+      return;
+    }
     if (sidebar.classList.contains("open")) {
       closeSidebarDrawer();
       return;
@@ -724,6 +877,10 @@ window.addEventListener("beforeunload", flushAutosave);
 
 injectIcons();
 applyTheme(currentTheme(), false);
+const aspectPrefs = loadAspectPrefs();
+tone = aspectPrefs.tone;
+style = aspectPrefs.style;
+applyAspectState();
 panelPrefs = loadPanelPrefs();
 applyPanelState();
 updateStats();

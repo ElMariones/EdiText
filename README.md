@@ -5,7 +5,8 @@ EdiText is a minimalist plain-text editor for `.txt` files with one signature ex
 ## Features
 
 - **Minimal plain-text editor** — a distraction-free writing surface. No fonts, no formatting, no clutter.
-- **Three-column layout** — the editor sits centered between a **documents sidebar** on the left and a **One-Liner panel** on the right. Both side columns are retractable (toolbar toggles, the panel's ✕, or <kbd>⌘/Ctrl ⇧ L</kbd>) and remember their state.
+- **Three-column layout** — the editor sits centered between a **documents sidebar** on the left and a **One-Liner panel** on the right. Both columns are equal-width and retractable via their own in-column toggle button (which flips direction to reopen), the toolbar toggles, or <kbd>⌘/Ctrl ⇧ L</kbd>.
+- **Aspects** — a palette button opens the aspect picker: five **tones** (cream, blue, green, red, white) each with day and night modes, plus four overhauled **styles** (Cyberpunk, Windows 98, Paper, Console). Tones and styles are independent and remembered.
 - **Documents sidebar** — every draft and opened file is kept on the left (a slide-in drawer on mobile); switch between them instantly, and each one autosaves independently.
 - **Live statistics** — lines · words · characters, updated on every keystroke.
 - **One-Liner panel** — paste multiline text on the right, get it back as one line automatically as you type (handles `\r\n`, `\r`, `\n`, and blank-line runs), then copy the result.
