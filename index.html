@@ -54,7 +54,17 @@
         </div>
 
         <nav class="toolbar" aria-label="Editor actions">
-          <button type="button" class="tool" id="new-btn" title="New document" aria-label="New document">
+          <button
+            type="button"
+            class="tool sidebar-toggle"
+            id="sidebar-toggle"
+            title="Documents"
+            aria-label="Show documents"
+            aria-expanded="false"
+          >
+            <span class="ic" data-icon="docs"></span>
+          </button>
+          <button type="button" class="tool" id="new-btn" title="New document (⌘N)" aria-label="New document">
             <span class="ic" data-icon="plus"></span>
           </button>
           <button type="button" class="tool" id="open-btn" title="Open a .txt file" aria-label="Open a .txt file">
@@ -85,40 +95,65 @@
         </nav>
       </header>
 
-      <main class="editor-card glass" id="editor-card">
-        <label class="visually-hidden" for="editor">Plain text document</label>
-        <textarea
-          id="editor"
-          placeholder="Start typing…"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="sentences"
-          spellcheck="true"
-        ></textarea>
+      <div class="body">
+        <aside class="sidebar glass" id="sidebar" aria-label="Documents">
+          <div class="sidebar-head">
+            <span class="sidebar-title">Documents</span>
+            <button
+              type="button"
+              class="tool sidebar-new"
+              id="new-doc-btn"
+              title="New document (⌘N)"
+              aria-label="New document"
+            >
+              <span class="ic" data-icon="plus"></span>
+            </button>
+          </div>
+          <ul class="doc-list" id="doc-list" role="listbox" aria-label="Documents"></ul>
+        </aside>
 
-        <footer class="statusbar">
-          <span class="status-file" id="file-name" hidden></span>
-          <span class="status-stats" id="stats">
-            <span id="stat-lines">0 lines</span>
-            <span class="dot-sep">·</span>
-            <span id="stat-words">0 words</span>
-            <span class="dot-sep">·</span>
-            <span id="stat-chars">0 characters</span>
-          </span>
-          <span class="status-save" id="save-status" role="status" aria-live="polite">
-            <span class="save-dot" aria-hidden="true"></span><span id="save-text"></span>
-          </span>
-        </footer>
+        <div class="main-area">
+          <main class="editor-card glass" id="editor-card">
+            <label class="visually-hidden" for="editor">Plain text document</label>
+            <textarea
+              id="editor"
+              placeholder="Start typing…"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="sentences"
+              spellcheck="true"
+            ></textarea>
 
-        <div class="drop-overlay" id="drop-overlay" aria-hidden="true">
-          <p>Drop text file to open</p>
+            <footer class="statusbar">
+              <span class="status-file" id="file-name" hidden></span>
+              <span class="status-stats" id="stats">
+                <span id="stat-lines">0 lines</span>
+                <span class="dot-sep">·</span>
+                <span id="stat-words">0 words</span>
+                <span class="dot-sep">·</span>
+                <span id="stat-chars">0 characters</span>
+              </span>
+              <span class="status-save" id="save-status" role="status" aria-live="polite">
+                <span class="save-dot" aria-hidden="true"></span><span id="save-text"></span>
+              </span>
+            </footer>
+
+            <div class="drop-overlay" id="drop-overlay" aria-hidden="true">
+              <p>Drop text file to open</p>
+            </div>
+          </main>
+
+          <p class="footnote">
+            <span class="footnote-keys"
+              ><kbd>⌘/Ctrl S</kbd> save · <kbd>⌘/Ctrl N</kbd> new ·
+              <kbd>⌘/Ctrl ⇧ L</kbd> one-liner</span
+            >
+          </p>
         </div>
-      </main>
-
-      <p class="footnote">
-        <span class="footnote-keys"><kbd>⌘/Ctrl S</kbd> save · <kbd>⌘/Ctrl ⇧ L</kbd> one-liner</span>
-      </p>
+      </div>
     </div>
+
+    <div class="sidebar-scrim" id="sidebar-scrim" aria-hidden="true"></div>
 
     <input type="file" id="file-input" accept=".txt,text/plain" hidden />
 

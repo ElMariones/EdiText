@@ -2,7 +2,7 @@ import "./style.css";
 import { icons, injectIcons } from "./icons";
 import { toOneLiner } from "./convert";
 import { getStats } from "./stats";
-import { clearStoredDraft, loadDraft, saveDraft } from "./storage";
+import { type Doc, loadDocs, saveDocs, uid } from "./storage";
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -39,14 +39,17 @@ const oneLinerBtn = byId<HTMLButtonElement>("oneliner-btn");
 
 const fileInput = byId<HTMLInputElement>("file-input");
 
+const sidebar = byId<HTMLElement>("sidebar");
+const sidebarToggle = byId<HTMLButtonElement>("sidebar-toggle");
+const sidebarScrim = byId<HTMLDivElement>("sidebar-scrim");
+const newDocBtn = byId<HTMLButtonElement>("new-doc-btn");
+const docList = byId<HTMLUListElement>("doc-list");
+
 const olOverlay = byId<HTMLDivElement>("ol-overlay");
 const olClose = byId<HTMLButtonElement>("ol-close");
 const olInput = byId<HTMLTextAreaElement>("ol-input");
 const olOutput = byId<HTMLTextAreaElement>("ol-output");
 const olCopy = byId<HTMLButtonElement>("ol-copy");
-
-const themeBtn = byId<HTMLButtonElement>("theme-btn");
-const themeIcon = themeBtn.querySelector<HTMLElement>("[data-icon]");
 
 const confirmOverlay = byId<HTMLDivElement>("confirm-overlay");
 const confirmTitle = byId<HTMLElement>("confirm-title");
@@ -56,19 +59,26 @@ const confirmOk = byId<HTMLButtonElement>("confirm-ok");
 
 const toastEl = byId<HTMLDivElement>("toast");
 
+const themeBtn = byId<HTMLButtonElement>("theme-btn");
+const themeIcon = themeBtn.querySelector<HTMLElement>("[data-icon]");
+
+const drawerQuery = window.matchMedia("(max-width: 720px)");
+
 /* ------------------------------------------------------------------ */
 /* State                                                               */
 /* ------------------------------------------------------------------ */
 
+let docs: Doc[] = [];
+let activeId: string | null = null;
 let fileName: string | null = null;
+let pendingSave = false;
 let autosaveTimer: ReturnType<typeof setTimeout> | undefined;
 let savedStatusTimer: ReturnType<typeof setTimeout> | undefined;
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 /* ------------------------------------------------------------------ */
 /* Toast                                                               */
 /* ------------------------------------------------------------------ */
-
-let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 function toast(message: string, isError = false): void {
   toastEl.textContent = message;
@@ -76,8 +86,69 @@ function toast(message: string, isError = false): void {
   toastEl.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2400);
-}/* ------------------------------------------------------------------ */
-/* Stats + autosave                                                    */
+}
+
+/* ------------------------------------------------------------------ */
+/* Active document                                                     */
+/* ------------------------------------------------------------------ */
+
+function activeDoc(): Doc | undefined {
+  return docs.find((d) => d.id === activeId);
+}
+
+function displayTitle(doc: Doc): string {
+  if (doc.name) return doc.name;
+  const firstLine = doc.text.split("\n")[0]!.trim();
+  return firstLine || "Untitled";
+}
+
+function relativeTime(t: number): string {
+  const mins = Math.floor((Date.now() - t) / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function saveStore(): void {
+  if (activeId && docs.length > 0) saveDocs({ activeId, docs });
+}
+
+function persistCurrent(): boolean {
+  const doc = activeDoc();
+  if (!doc) return false;
+  if (pendingSave) {
+    doc.text = editor.value;
+    doc.updatedAt = Date.now();
+    pendingSave = false;
+    saveStore();
+    return true;
+  }
+  return false;
+}
+
+function scheduleAutosave(): void {
+  pendingSave = true;
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    if (persistCurrent()) {
+      flashSaved("Auto-saved");
+      renderDocList();
+    }
+  }, 450);
+}
+
+function flushAutosave(): void {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = undefined;
+  persistCurrent();
+}
+
+/* ------------------------------------------------------------------ */
+/* Stats, title, status                                                */
 /* ------------------------------------------------------------------ */
 
 function updateStats(): void {
@@ -95,7 +166,8 @@ function updateFileName(): void {
   } else {
     fileNameEl.hidden = true;
   }
-  document.title = fileName ? `${fileName} — EdiText` : "EdiText";
+  const doc = activeDoc();
+  document.title = doc ? `${displayTitle(doc)} — EdiText` : "EdiText";
 }
 
 function flashSaved(message: string): void {
@@ -105,12 +177,20 @@ function flashSaved(message: string): void {
   savedStatusTimer = setTimeout(() => saveStatusEl.classList.remove("show"), 2200);
 }
 
-function scheduleAutosave(): void {
-  clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(() => {
-    saveDraft({ name: fileName, text: editor.value });
-    flashSaved("Auto-saved");
-  }, 450);
+function onEditorChanged(): void {
+  updateStats();
+  const doc = activeDoc();
+  if (doc) doc.text = editor.value;
+  scheduleAutosave();
+  updateActiveItemLive();
+}
+
+function updateActiveItemLive(): void {
+  const li = activeId ? docList.querySelector<HTMLElement>(`.doc-item[data-id="${activeId}"]`) : null;
+  const doc = activeDoc();
+  if (!li || !doc) return;
+  li.querySelector(".doc-title")!.textContent = displayTitle(doc);
+  li.querySelector(".doc-meta")!.textContent = relativeTime(doc.updatedAt);
 }
 
 /** Replace the whole document while keeping native undo/redo working. */
@@ -119,7 +199,6 @@ function replaceEditorText(text: string): void {
   let done = false;
   try {
     if (document.execCommand("selectAll", false)) {
-      // insertText("") is a no-op in some engines, so delete explicitly.
       done =
         text === ""
           ? document.execCommand("delete", false)
@@ -132,9 +211,119 @@ function replaceEditorText(text: string): void {
   onEditorChanged();
 }
 
-function onEditorChanged(): void {
+/* ------------------------------------------------------------------ */
+/* Sidebar list                                                        */
+/* ------------------------------------------------------------------ */
+
+function renderDocList(): void {
+  const sorted = [...docs].sort((a, b) => b.updatedAt - a.updatedAt);
+  docList.textContent = "";
+  for (const doc of sorted) {
+    const item = document.createElement("li");
+    item.className = "doc-item" + (doc.id === activeId ? " active" : "");
+    item.dataset.id = doc.id;
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", String(doc.id === activeId));
+    item.tabIndex = 0;
+    item.innerHTML = `
+      <div class="doc-item-main">
+        <span class="doc-title"></span>
+        <span class="doc-meta"></span>
+      </div>
+      <button type="button" class="doc-delete" title="Delete document" aria-label="Delete document">
+        <span class="ic" data-icon="trash"></span>
+      </button>`;
+    (item.querySelector(".doc-title") as HTMLElement).textContent = displayTitle(doc);
+    (item.querySelector(".doc-meta") as HTMLElement).textContent = relativeTime(doc.updatedAt);
+    const del = item.querySelector<HTMLButtonElement>(".doc-delete")!;
+    del.addEventListener("click", (e) => {
+      e.stopPropagation();
+      void deleteDocument(doc.id);
+    });
+    item.addEventListener("click", () => switchToDoc(doc));
+    item.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        switchToDoc(doc);
+      }
+    });
+    docList.appendChild(item);
+  }
+  injectIcons(docList);
+}
+
+/* ------------------------------------------------------------------ */
+/* Document actions                                                    */
+/* ------------------------------------------------------------------ */
+
+function loadDocIntoEditor(doc: Doc): void {
+  editor.value = doc.text;
   updateStats();
-  scheduleAutosave();
+}
+
+function switchToDoc(doc: Doc): void {
+  flushAutosave();
+  activeId = doc.id;
+  fileName = doc.name;
+  loadDocIntoEditor(doc);
+  updateFileName();
+  renderDocList();
+  saveStore();
+  closeSidebarDrawer();
+  editor.focus();
+}
+
+function createDocument(): void {
+  flushAutosave();
+  const doc: Doc = { id: uid(), name: null, text: "", updatedAt: Date.now() };
+  docs.unshift(doc);
+  activeId = doc.id;
+  fileName = null;
+  loadDocIntoEditor(doc);
+  updateFileName();
+  saveStore();
+  renderDocList();
+  closeSidebarDrawer();
+  editor.focus();
+  toast("New document");
+}
+
+async function clearCurrentDocument(): Promise<void> {
+  if (editor.value === "") return;
+  const ok = await confirmAction("Clear the editor?", "All current text will be removed.", "Clear");
+  if (!ok) return;
+  replaceEditorText("");
+  saveStatusEl.classList.remove("show");
+  editor.focus();
+  toast("Editor cleared");
+}
+
+async function deleteDocument(id: string): Promise<void> {
+  const doc = docs.find((d) => d.id === id);
+  if (!doc) return;
+  if (doc.text !== "") {
+    const ok = await confirmAction(
+      "Delete this document?",
+      `"${displayTitle(doc)}" will be removed from your device.`,
+      "Delete"
+    );
+    if (!ok) return;
+  }
+  const wasActive = id === activeId;
+  if (wasActive) flushAutosave();
+  docs = docs.filter((d) => d.id !== id);
+  if (docs.length === 0) {
+    const fresh: Doc = { id: uid(), name: null, text: "", updatedAt: Date.now() };
+    docs.push(fresh);
+  }
+  if (wasActive) {
+    activeId = null;
+    switchToDoc(docs[0]!);
+  } else {
+    saveStore();
+    renderDocList();
+  }
+  toast("Document deleted");
 }
 
 /* ------------------------------------------------------------------ */
@@ -147,7 +336,6 @@ async function copyToClipboard(text: string): Promise<boolean> {
     await navigator.clipboard.writeText(text);
     return true;
   } catch {
-    // Fallback for older Safari or blocked permissions.
     try {
       const scratch = document.createElement("textarea");
       scratch.value = text;
@@ -211,17 +399,24 @@ function openFile(file: File): void {
   file
     .text()
     .then((text) => {
-      replaceEditorText(text);
-      fileName = file.name.replace(/[\\/]/g, "").slice(0, 120) || null;
+      flushAutosave();
+      const base = file.name.replace(/[\\/]/g, "").slice(0, 120) || null;
+      const doc: Doc = { id: uid(), name: base, text, updatedAt: Date.now() };
+      docs.unshift(doc);
+      activeId = doc.id;
+      fileName = base;
+      loadDocIntoEditor(doc);
       updateFileName();
-      onEditorChanged();
-      toast(`Opened ${fileName ?? "file"}`);
+      saveStore();
+      renderDocList();
+      closeSidebarDrawer();
+      toast(`Opened ${base ?? "file"}`);
     })
     .catch(() => toast("That file could not be read.", true));
 }
 
 /* ------------------------------------------------------------------ */
-/* New / clear with confirmation                                       */
+/* Confirm dialog                                                      */
 /* ------------------------------------------------------------------ */
 
 let confirmResolve: ((ok: boolean) => void) | null = null;
@@ -252,27 +447,6 @@ function settleConfirm(ok: boolean): void {
   resolve?.(ok);
 }
 
-async function resetDocument(action: "new" | "clear"): Promise<void> {
-  if (editor.value !== "") {
-    const isNew = action === "new";
-    const ok = await confirmAction(
-      isNew ? "Create a new document?" : "Clear the editor?",
-      isNew
-        ? "Your current text will be removed from this document."
-        : "All current text will be removed.",
-      isNew ? "New document" : "Clear"
-    );
-    if (!ok) return;
-  }
-  replaceEditorText("");
-  fileName = null;
-  updateFileName();
-  clearStoredDraft();
-  saveStatusEl.classList.remove("show");
-  editor.focus();
-  toast(action === "new" ? "New document" : "Editor cleared");
-}
-
 /* ------------------------------------------------------------------ */
 /* Layer management (modals)                                           */
 /* ------------------------------------------------------------------ */
@@ -280,7 +454,6 @@ async function resetDocument(action: "new" | "clear"): Promise<void> {
 function openLayer(layer: HTMLElement, focusTarget?: HTMLElement | null): void {
   lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   layer.hidden = false;
-  // Commit the hidden state before adding .open so the enter transition runs.
   void layer.offsetWidth;
   layer.classList.add("open");
   focusTarget?.focus();
@@ -359,7 +532,7 @@ window.addEventListener("dragover", (e) => e.preventDefault());
 window.addEventListener("drop", (e) => e.preventDefault());
 
 document.addEventListener("dragenter", (e) => {
-  if (!(e.dataTransfer?.types.includes("Files"))) return;
+  if (!e.dataTransfer?.types.includes("Files")) return;
   dragDepth += 1;
   document.body.classList.add("dragging");
 });
@@ -376,11 +549,36 @@ document.addEventListener("drop", (e) => {
   if (file) openFile(file);
 });
 
-// Safety net if a drag ends outside the page (drop on browser UI, etc.).
 window.addEventListener("blur", () => {
   dragDepth = 0;
   document.body.classList.remove("dragging");
 });
+
+/* ------------------------------------------------------------------ */
+/* Sidebar drawer (mobile)                                             */
+/* ------------------------------------------------------------------ */
+
+function openSidebarDrawer(): void {
+  if (!drawerQuery.matches) return;
+  sidebar.classList.add("open");
+  sidebarScrim.classList.add("open");
+  sidebarToggle.setAttribute("aria-expanded", "true");
+  const activeItem = docList.querySelector<HTMLElement>(".doc-item.active");
+  (activeItem ?? sidebar).focus();
+}
+
+function closeSidebarDrawer(): void {
+  if (!drawerQuery.matches) return;
+  sidebar.classList.remove("open");
+  sidebarScrim.classList.remove("open");
+  sidebarToggle.setAttribute("aria-expanded", "false");
+}
+
+sidebarToggle.addEventListener("click", () => {
+  if (sidebar.classList.contains("open")) closeSidebarDrawer();
+  else openSidebarDrawer();
+});
+sidebarScrim.addEventListener("click", closeSidebarDrawer);
 
 /* ------------------------------------------------------------------ */
 /* Theme (day / night)                                                 */
@@ -421,8 +619,9 @@ themeBtn.addEventListener("click", () => {
 /* Toolbar wiring                                                      */
 /* ------------------------------------------------------------------ */
 
-newBtn.addEventListener("click", () => void resetDocument("new"));
-clearBtn.addEventListener("click", () => void resetDocument("clear"));
+newBtn.addEventListener("click", createDocument);
+newDocBtn.addEventListener("click", createDocument);
+clearBtn.addEventListener("click", () => void clearCurrentDocument());
 openBtn.addEventListener("click", () => fileInput.click());
 saveBtn.addEventListener("click", saveFile);
 copyBtn.addEventListener("click", () => void copyAll());
@@ -444,6 +643,10 @@ document.addEventListener("keydown", (e) => {
   const meta = e.metaKey || e.ctrlKey;
 
   if (e.key === "Escape") {
+    if (sidebar.classList.contains("open")) {
+      closeSidebarDrawer();
+      return;
+    }
     const layer = anyOpenLayer();
     if (layer === confirmOverlay) {
       settleConfirm(false);
@@ -465,27 +668,39 @@ document.addEventListener("keydown", (e) => {
   if (key === "s" && !e.shiftKey) {
     e.preventDefault();
     saveFile();
+  } else if (key === "n") {
+    e.preventDefault();
+    createDocument();
   } else if (key === "l" && e.shiftKey) {
     e.preventDefault();
     if (olOverlay.hidden) openOneLiner();
   }
 });
 
+window.addEventListener("beforeunload", flushAutosave);
+
 /* ------------------------------------------------------------------ */
 /* Boot                                                                */
 /* ------------------------------------------------------------------ */
 
 injectIcons();
-
 applyTheme(currentTheme(), false);
-
 updateStats();
 
-const draft = loadDraft();
-if (draft && draft.text !== "") {
-  editor.value = draft.text;
-  fileName = draft.name;
-  updateFileName();
-  updateStats();
-  flashSaved("Draft restored");
+const loaded = loadDocs();
+if (loaded && loaded.docs.length > 0) {
+  docs = loaded.docs;
+  activeId = loaded.activeId;
+  const active = activeDoc() ?? docs[0]!;
+  activeId = active.id;
+  fileName = active.name;
+  loadDocIntoEditor(active);
+  if (active.text !== "") flashSaved("Draft restored");
+} else {
+  const doc: Doc = { id: uid(), name: null, text: "", updatedAt: Date.now() };
+  docs = [doc];
+  activeId = doc.id;
+  saveStore();
 }
+updateFileName();
+renderDocList();
