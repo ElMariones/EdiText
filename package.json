@@ -1,0 +1,17 @@
+{
+  "name": "editext",
+  "private": true,
+  "version": "1.0.0",
+  "description": "EdiText — a minimalist plain-text editor with a Text → One-Liner converter. Simple text. Nothing else.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "node logic.test.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

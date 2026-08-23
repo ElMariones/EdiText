@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="EdiText — a minimalist plain-text editor for .txt files, with a one-liner converter. Simple text. Nothing else."
+    />
+    <meta name="theme-color" content="#F7F3EA" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>EdiText — Simple text. Nothing else.</title>
+  </head>
+  <body>
+    <!-- Soft ambient washes that give the glass surfaces something to blur -->
+    <div class="ambient" aria-hidden="true">
+      <div class="ambient-blob ambient-a"></div>
+      <div class="ambient-blob ambient-b"></div>
+      <div class="ambient-blob ambient-c"></div>
+    </div>
+
+    <div class="shell app">
+      <header class="header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="30" height="30">
+              <defs>
+                <linearGradient id="brand-g" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#F3B269" />
+                  <stop offset="1" stop-color="#D98A3D" />
+                </linearGradient>
+              </defs>
+              <rect width="32" height="32" rx="8.5" fill="url(#brand-g)" />
+              <g stroke="#FFFDF6" stroke-width="2.4" stroke-linecap="round" fill="none">
+                <path d="M12 9.5v13" />
+                <path d="M12 9.5h8.5" />
+                <path d="M12 16h7" />
+                <path d="M12 22.5h8.5" />
+              </g>
+            </svg>
+          </span>
+          <div class="brand-text">
+            <h1>EdiText</h1>
+            <p>Simple text. Nothing else.</p>
+          </div>
+        </div>
+
+        <nav class="toolbar" aria-label="Editor actions">
+          <button type="button" class="tool" id="new-btn" title="New document" aria-label="New document">
+            <span class="ic" data-icon="plus"></span>
+          </button>
+          <button type="button" class="tool" id="open-btn" title="Open a .txt file" aria-label="Open a .txt file">
+            <span class="ic" data-icon="folder"></span>
+          </button>
+          <button type="button" class="tool" id="save-btn" title="Save as .txt (⌘S)" aria-label="Save as .txt file">
+            <span class="ic" data-icon="download"></span>
+          </button>
+
+          <span class="toolbar-sep" role="presentation"></span>
+
+          <button type="button" class="tool" id="copy-btn" title="Copy all text" aria-label="Copy all text">
+            <span class="ic" data-icon="copy"></span>
+          </button>
+          <button type="button" class="tool" id="clear-btn" title="Clear editor" aria-label="Clear the editor">
+            <span class="ic" data-icon="trash"></span>
+          </button>
+
+          <span class="toolbar-sep" role="presentation"></span>
+
+          <button type="button" class="tool tool-primary" id="oneliner-btn" title="Text → One-Liner (⌘⇧L)">
+            <span class="ic" data-icon="oneliner"></span>
+            <span class="tool-primary-label">One-Liner</span>
+          </button>
+        </nav>
+      </header>
+
+      <main class="editor-card glass" id="editor-card">
+        <label class="visually-hidden" for="editor">Plain text document</label>
+        <textarea
+          id="editor"
+          placeholder="Start typing…"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="sentences"
+          spellcheck="true"
+        ></textarea>
+
+        <footer class="statusbar">
+          <span class="status-file" id="file-name" hidden></span>
+          <span class="status-stats" id="stats">
+            <span id="stat-lines">0 lines</span>
+            <span class="dot-sep">·</span>
+            <span id="stat-words">0 words</span>
+            <span class="dot-sep">·</span>
+            <span id="stat-chars">0 characters</span>
+          </span>
+          <span class="status-save" id="save-status" role="status" aria-live="polite">
+            <span class="save-dot" aria-hidden="true"></span><span id="save-text"></span>
+          </span>
+        </footer>
+
+        <div class="drop-overlay" id="drop-overlay" aria-hidden="true">
+          <p>Drop text file to open</p>
+        </div>
+      </main>
+
+      <p class="footnote">
+        <span class="footnote-keys"><kbd>⌘/Ctrl S</kbd> save · <kbd>⌘/Ctrl ⇧ L</kbd> one-liner</span>
+        <span class="footnote-privacy">Everything stays on your device — no servers, no accounts.</span>
+      </p>
+    </div>
+
+    <input type="file" id="file-input" accept=".txt,text/plain" hidden />
+
+    <!-- One-Liner modal -->
+    <div class="overlay" id="ol-overlay" hidden>
+      <section class="modal glass" role="dialog" aria-modal="true" aria-labelledby="ol-title" aria-describedby="ol-subtitle">
+        <header class="modal-head">
+          <div class="modal-heading">
+            <h2 id="ol-title">Text → One-Liner</h2>
+            <p id="ol-subtitle">Remove line breaks while preserving spaces and text.</p>
+          </div>
+          <button type="button" class="tool" id="ol-close" title="Close (Esc)" aria-label="Close one-liner window">
+            <span class="ic" data-icon="x"></span>
+          </button>
+        </header>
+
+        <p class="ol-example" aria-hidden="true">
+          <span class="ol-example-in"><i>↵</i> Line 1 <i>↵</i> Line 2 <i>↵</i> Line 3</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          <span class="ol-example-out">Line 1 Line 2 Line 3</span>
+        </p>
+
+        <div class="ol-grid">
+          <section class="ol-pane">
+            <label for="ol-input">Input</label>
+            <textarea id="ol-input" placeholder="Paste your multiline text here…" spellcheck="false"></textarea>
+            <button type="button" class="btn btn-solid" id="ol-convert">
+              <span class="ic ic-inline" data-icon="wand"></span>
+              Convert to One-Liner
+            </button>
+          </section>
+
+          <section class="ol-pane ol-pane-result">
+            <label for="ol-output">Result</label>
+            <textarea id="ol-output" readonly placeholder="Your one-liner will appear here…"></textarea>
+            <button type="button" class="btn btn-quiet" id="ol-copy">
+              <span class="ic ic-inline" data-icon="copy"></span>
+              Copy result
+            </button>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <!-- Confirm dialog -->
+    <div class="overlay overlay-confirm" id="confirm-overlay" hidden>
+      <section class="modal-confirm glass" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+        <h2 id="confirm-title">Discard this document?</h2>
+        <p id="confirm-message">Your current text will be removed.</p>
+        <div class="confirm-actions">
+          <button type="button" class="btn btn-quiet" id="confirm-cancel">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirm-ok">Discard</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
