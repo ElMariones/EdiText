@@ -210,6 +210,7 @@ textarea:focus-visible {
   display: flex;
   gap: 12px;
   min-height: 0;
+  padding-bottom: 18px; /* equal small margin under all three columns */
 }
 
 .main-area {
@@ -496,32 +497,6 @@ body.dragging .drop-overlay {
   transform: scale(1);
 }
 
-/* ---------- Footnote ---------- */
-
-.footnote {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 18px 8px calc(20px + env(safe-area-inset-bottom));
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.footnote-keys kbd {
-  display: inline-block;
-  padding: 2px 7px;
-  margin: 0 1px;
-  border-radius: 6px;
-  border: 1px solid var(--border-hairline);
-  background: var(--kbd-bg);
-  box-shadow: var(--kbd-shadow);
-  font-family: inherit;
-  font-size: 11px;
-  color: var(--kbd-ink);
-}
-
 /* ---------- Sidebar & One-Liner panel (equal retractable columns) ---------- */
 
 .sidebar,
@@ -603,35 +578,6 @@ body.dragging .drop-overlay {
 .col-action .ic {
   width: 16px;
   height: 16px;
-}
-
-/* Collapsed columns collapse to a slim rail; the in-column toggle flips to reopen. */
-.sidebar.collapsed,
-.oneliner-panel.collapsed {
-  width: 46px;
-  padding: 8px 4px;
-}
-
-.sidebar.collapsed .sidebar-head,
-.oneliner-panel.collapsed .panel-head {
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-  padding: 4px 0;
-}
-
-.sidebar.collapsed .sidebar-title,
-.sidebar.collapsed .sidebar-new,
-.oneliner-panel.collapsed .sidebar-title,
-.oneliner-panel.collapsed .ol-pane,
-.oneliner-panel.collapsed .ol-copy {
-  display: none;
-}
-
-.sidebar.collapsed .col-toggle .ic,
-.oneliner-panel.collapsed .col-toggle .ic {
-  transform: rotate(180deg);
 }
 
 .doc-list {
@@ -1959,9 +1905,6 @@ body.dragging .drop-overlay {
     font-size: 16px; /* prevents iOS focus zoom */
   }
 
-  .footnote-keys {
-    display: none;
-  }
 }
 
 @media (min-width: 721px) {
@@ -1992,6 +1935,17 @@ body.dragging .drop-overlay {
   .sidebar.collapsed .col-toggle .ic,
   .oneliner-panel.collapsed .col-toggle .ic {
     transform: rotate(180deg);
+  }
+
+  /* The toggle fills the whole rail so clicking anywhere reopens the column. */
+  .sidebar.collapsed .col-toggle,
+  .oneliner-panel.collapsed .col-toggle {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: auto;
+    border-radius: var(--radius-sm);
   }
 }
 
