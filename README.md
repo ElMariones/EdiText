@@ -1,14 +1,13 @@
 # EdiText
 
-**Simple text. Nothing else.**
-
 EdiText is a minimalist plain-text editor for `.txt` files with one signature extra: a **Text → One-Liner** converter that collapses multiline text into a single continuous line. It runs entirely in your browser — no backend, no accounts, no tracking.
 
 ## Features
 
 - **Minimal plain-text editor** — a distraction-free writing surface. No fonts, no formatting, no clutter.
 - **Live statistics** — lines · words · characters, updated on every keystroke.
-- **One-Liner converter** — paste multiline text, get it back as one line (handles `\r\n`, `\r`, `\n`, and blank-line runs). Opens from the toolbar or <kbd>⌘/Ctrl ⇧ L</kbd>.
+- **One-Liner converter** — paste multiline text, get it back as one line automatically as you type (handles `\r\n`, `\r`, `\n`, and blank-line runs). Opens from the toolbar or <kbd>⌘/Ctrl ⇧ L</kbd>.
+- **Day / night mode** — a toolbar toggle switches between warm light and dark themes; your preference is remembered.
 - **Open & save `.txt`** — everything happens locally via the File API and Blob downloads.
 - **Drag & drop** — drop a `.txt` file anywhere on the page to open it.
 - **Autosave** — your draft is preserved in `localStorage` (debounced) and restored on reload.

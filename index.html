@@ -5,11 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
-      content="EdiText — a minimalist plain-text editor for .txt files, with a one-liner converter. Simple text. Nothing else."
+      content="EdiText — a minimalist plain-text editor for .txt files, with a one-liner converter."
     />
-    <meta name="theme-color" content="#F7F3EA" />
+    <meta name="theme-color" id="theme-color" content="#F7F3EA" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>EdiText — Simple text. Nothing else.</title>
+    <title>EdiText</title>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("editext.theme");
+          if (t !== "dark" && t !== "light") {
+            t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <!-- Soft ambient washes that give the glass surfaces something to blur -->
@@ -31,17 +42,14 @@
                 </linearGradient>
               </defs>
               <rect width="32" height="32" rx="8.5" fill="url(#brand-g)" />
-              <g stroke="#FFFDF6" stroke-width="2.4" stroke-linecap="round" fill="none">
-                <path d="M12 9.5v13" />
-                <path d="M12 9.5h8.5" />
-                <path d="M12 16h7" />
-                <path d="M12 22.5h8.5" />
+              <g transform="translate(4 4)" stroke="#FFFDF6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
+                <path d="m15 5 4 4" />
               </g>
             </svg>
           </span>
           <div class="brand-text">
             <h1>EdiText</h1>
-            <p>Simple text. Nothing else.</p>
           </div>
         </div>
 
@@ -63,6 +71,9 @@
           </button>
           <button type="button" class="tool" id="clear-btn" title="Clear editor" aria-label="Clear the editor">
             <span class="ic" data-icon="trash"></span>
+          </button>
+          <button type="button" class="tool" id="theme-btn" title="Switch to dark mode" aria-label="Switch to dark mode">
+            <span class="ic" data-icon="moon"></span>
           </button>
 
           <span class="toolbar-sep" role="presentation"></span>
@@ -106,7 +117,6 @@
 
       <p class="footnote">
         <span class="footnote-keys"><kbd>⌘/Ctrl S</kbd> save · <kbd>⌘/Ctrl ⇧ L</kbd> one-liner</span>
-        <span class="footnote-privacy">Everything stays on your device — no servers, no accounts.</span>
       </p>
     </div>
 
@@ -125,20 +135,10 @@
           </button>
         </header>
 
-        <p class="ol-example" aria-hidden="true">
-          <span class="ol-example-in"><i>↵</i> Line 1 <i>↵</i> Line 2 <i>↵</i> Line 3</span>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
-          <span class="ol-example-out">Line 1 Line 2 Line 3</span>
-        </p>
-
         <div class="ol-grid">
           <section class="ol-pane">
             <label for="ol-input">Input</label>
             <textarea id="ol-input" placeholder="Paste your multiline text here…" spellcheck="false"></textarea>
-            <button type="button" class="btn btn-solid" id="ol-convert">
-              <span class="ic ic-inline" data-icon="wand"></span>
-              Convert to One-Liner
-            </button>
           </section>
 
           <section class="ol-pane ol-pane-result">

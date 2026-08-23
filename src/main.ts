@@ -1,5 +1,5 @@
 import "./style.css";
-import { injectIcons } from "./icons";
+import { icons, injectIcons } from "./icons";
 import { toOneLiner } from "./convert";
 import { getStats } from "./stats";
 import { clearStoredDraft, loadDraft, saveDraft } from "./storage";
@@ -43,8 +43,10 @@ const olOverlay = byId<HTMLDivElement>("ol-overlay");
 const olClose = byId<HTMLButtonElement>("ol-close");
 const olInput = byId<HTMLTextAreaElement>("ol-input");
 const olOutput = byId<HTMLTextAreaElement>("ol-output");
-const olConvert = byId<HTMLButtonElement>("ol-convert");
 const olCopy = byId<HTMLButtonElement>("ol-copy");
+
+const themeBtn = byId<HTMLButtonElement>("theme-btn");
+const themeIcon = themeBtn.querySelector<HTMLElement>("[data-icon]");
 
 const confirmOverlay = byId<HTMLDivElement>("confirm-overlay");
 const confirmTitle = byId<HTMLElement>("confirm-title");
@@ -93,9 +95,7 @@ function updateFileName(): void {
   } else {
     fileNameEl.hidden = true;
   }
-  document.title = fileName
-    ? `${fileName} — EdiText`
-    : "EdiText — Simple text. Nothing else.";
+  document.title = fileName ? `${fileName} — EdiText` : "EdiText";
 }
 
 function flashSaved(message: string): void {
@@ -333,17 +333,6 @@ function openOneLiner(): void {
 
 olInput.addEventListener("input", runConversion);
 
-olConvert.addEventListener("click", () => {
-  if (olInput.value.trim() === "") {
-    toast("Paste some multiline text first.", true);
-    olInput.focus();
-    return;
-  }
-  runConversion();
-  olOutput.focus();
-  olOutput.select();
-});
-
 olCopy.addEventListener("click", async () => {
   if (olOutput.value === "") {
     toast("Nothing to copy yet.", true);
@@ -391,6 +380,41 @@ document.addEventListener("drop", (e) => {
 window.addEventListener("blur", () => {
   dragDepth = 0;
   document.body.classList.remove("dragging");
+});
+
+/* ------------------------------------------------------------------ */
+/* Theme (day / night)                                                 */
+/* ------------------------------------------------------------------ */
+
+const THEME_KEY = "editext.theme";
+const themeColorMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+function currentTheme(): "light" | "dark" {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+function applyTheme(theme: "light" | "dark", persist: boolean): void {
+  document.documentElement.dataset.theme = theme;
+  const iconName = theme === "light" ? "moon" : "sun"; // shows the mode you'll switch to
+  if (themeIcon) {
+    themeIcon.dataset.icon = iconName;
+    themeIcon.innerHTML = icons[iconName]!;
+  }
+  const label = theme === "light" ? "Switch to dark mode" : "Switch to light mode";
+  themeBtn.title = label;
+  themeBtn.setAttribute("aria-label", label);
+  themeColorMeta?.setAttribute("content", theme === "dark" ? "#1C1A15" : "#F7F3EA");
+  if (persist) {
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      /* storage unavailable — theme still applies for this session */
+    }
+  }
+}
+
+themeBtn.addEventListener("click", () => {
+  applyTheme(currentTheme() === "dark" ? "light" : "dark", true);
 });
 
 /* ------------------------------------------------------------------ */
@@ -452,6 +476,8 @@ document.addEventListener("keydown", (e) => {
 /* ------------------------------------------------------------------ */
 
 injectIcons();
+
+applyTheme(currentTheme(), false);
 
 updateStats();
 
