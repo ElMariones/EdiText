@@ -29,6 +29,12 @@
   --caret: #d98a3d;
   --selection: rgba(243, 178, 105, 0.35);
 
+  /* Logo tint — re-themed per aspect/day-night below. */
+  --logo-a: #f3b269;
+  --logo-b: #d98a3d;
+  --logo-ink: #fffdf6;
+  --logo-shadow: rgba(160, 108, 43, 0.55);
+
   /* Derived component colors — themes override these to restyle the app. */
   --body-bg:
     radial-gradient(1100px 500px at 85% -8%, rgba(255, 255, 255, 0.9), transparent 60%),
@@ -248,12 +254,25 @@ textarea:focus-visible {
   border-radius: 12.5px;
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.45),
-    0 8px 18px -8px rgba(160, 108, 43, 0.55);
+    0 8px 18px -8px var(--logo-shadow);
+  transition: box-shadow 220ms var(--ease-out);
 }
 
 .brand-mark svg {
   display: block;
   border-radius: inherit;
+}
+
+.logo-stop-a {
+  stop-color: var(--logo-a);
+}
+
+.logo-stop-b {
+  stop-color: var(--logo-b);
+}
+
+.logo-strokes {
+  stroke: var(--logo-ink);
 }
 
 .brand-text h1 {
@@ -1767,6 +1786,96 @@ body.dragging .drop-overlay {
 
 [data-style="console"] .brand-text h1 {
   text-shadow: 0 0 10px rgba(51, 255, 102, 0.5);
+}
+
+/* ---------- Logo tint per theme ---------- */
+
+[data-theme="dark"] {
+  --logo-a: #e8a558;
+  --logo-b: #b06f24;
+  --logo-ink: #fff8ec;
+  --logo-shadow: rgba(0, 0, 0, 0.5);
+}
+
+[data-tone="blue"] {
+  --logo-a: #8ab4f0;
+  --logo-b: #2f6fd1;
+  --logo-ink: #f5f9ff;
+  --logo-shadow: rgba(31, 95, 193, 0.5);
+}
+
+[data-tone="green"] {
+  --logo-a: #9ed488;
+  --logo-b: #3e7a2e;
+  --logo-ink: #f4faf0;
+  --logo-shadow: rgba(62, 122, 46, 0.5);
+}
+
+[data-tone="red"] {
+  --logo-a: #f0a488;
+  --logo-b: #c33b2b;
+  --logo-ink: #fff8f5;
+  --logo-shadow: rgba(195, 59, 43, 0.5);
+}
+
+[data-tone="white"] {
+  --logo-a: #e3e3e3;
+  --logo-b: #8a8a8a;
+  --logo-ink: #ffffff;
+  --logo-shadow: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"][data-tone="blue"] {
+  --logo-a: #5c9bf2;
+  --logo-b: #1f4f9e;
+  --logo-ink: #eaf3ff;
+}
+
+[data-theme="dark"][data-tone="green"] {
+  --logo-a: #5cb848;
+  --logo-b: #2c5c1e;
+  --logo-ink: #eef8ea;
+}
+
+[data-theme="dark"][data-tone="red"] {
+  --logo-a: #e07a5a;
+  --logo-b: #9e2d20;
+  --logo-ink: #fff2ee;
+}
+
+[data-theme="dark"][data-tone="white"] {
+  --logo-a: #bdbdbd;
+  --logo-b: #5a5a5a;
+  --logo-ink: #f5f5f5;
+}
+
+/* Styles override tones for the logo (declared last on purpose). */
+[data-style="cyberpunk"] {
+  --logo-a: #00e5ff;
+  --logo-b: #ff2bd6;
+  --logo-ink: #041016;
+  --logo-shadow: rgba(0, 229, 255, 0.45);
+}
+
+[data-style="win98"] {
+  --logo-a: #1084d0;
+  --logo-b: #000080;
+  --logo-ink: #ffffff;
+  --logo-shadow: rgba(0, 0, 0, 0.4);
+}
+
+[data-style="paper"] {
+  --logo-a: #d9b98a;
+  --logo-b: #9c6b2f;
+  --logo-ink: #fdf9f0;
+  --logo-shadow: rgba(107, 97, 77, 0.4);
+}
+
+[data-style="console"] {
+  --logo-a: #1a7a33;
+  --logo-b: #051408;
+  --logo-ink: #33ff66;
+  --logo-shadow: rgba(51, 255, 102, 0.3);
 }
 
 /* ---------- Responsive ---------- */

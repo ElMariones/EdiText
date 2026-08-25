@@ -662,6 +662,7 @@ function applyTheme(theme: "light" | "dark", persist: boolean): void {
   themeBtn.title = label;
   themeBtn.setAttribute("aria-label", label);
   themeColorMeta?.setAttribute("content", theme === "dark" ? "#1C1A15" : "#F7F3EA");
+  updateFavicon();
   if (persist) {
     try {
       localStorage.setItem(THEME_KEY, theme);
@@ -669,6 +670,26 @@ function applyTheme(theme: "light" | "dark", persist: boolean): void {
       /* storage unavailable — theme still applies for this session */
     }
   }
+}
+
+/** Rebuild the favicon from the current logo colors so the tab matches the theme. */
+function updateFavicon(): void {
+  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+  if (!link) return;
+  const cs = getComputedStyle(document.documentElement);
+  const a = cs.getPropertyValue("--logo-a").trim() || "#f3b269";
+  const b = cs.getPropertyValue("--logo-b").trim() || "#d98a3d";
+  const ink = cs.getPropertyValue("--logo-ink").trim() || "#fffdf6";
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +
+    `<stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/>` +
+    `</linearGradient></defs>` +
+    `<rect width="32" height="32" rx="8.5" fill="url(#g)"/>` +
+    `<g transform="translate(4 4)" stroke="${ink}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">` +
+    `<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>` +
+    `<path d="m15 5 4 4"/></g></svg>`;
+  link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
 themeBtn.addEventListener("click", () => {
@@ -723,6 +744,7 @@ function applyAspectState(): void {
   else root.dataset.style = style;
   themeBtn.disabled = style !== "basic"; // styles are fixed looks
   markAspectActive();
+  updateFavicon();
 }
 
 function setTone(id: string): void {
