@@ -1078,7 +1078,7 @@ body.dragging .drop-overlay {
 
 /* ---------- Night mode (cream dark) ---------- */
 
-[data-theme="dark"] {
+html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #1c1a15;
   --ink: #e7e2d6;
@@ -1152,7 +1152,7 @@ body.dragging .drop-overlay {
 
 /* ---------- Tone themes (light) ---------- */
 
-[data-tone="blue"] {
+html[data-tone="blue"] {
   --bg: #eef1f7;
   --ink: #222a3c;
   --ink-strong: #161d2c;
@@ -1185,7 +1185,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(91, 132, 214, 0.18);
 }
 
-[data-tone="green"] {
+html[data-tone="green"] {
   --bg: #eef3ea;
   --ink: #24311f;
   --ink-strong: #161f12;
@@ -1218,7 +1218,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(111, 154, 90, 0.18);
 }
 
-[data-tone="red"] {
+html[data-tone="red"] {
   --bg: #f7ece9;
   --ink: #3a2220;
   --ink-strong: #2a1412;
@@ -1251,7 +1251,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(196, 119, 95, 0.18);
 }
 
-[data-tone="white"] {
+html[data-tone="white"] {
   --bg: #fafafa;
   --ink: #2a2a2a;
   --ink-strong: #1a1a1a;
@@ -1292,7 +1292,7 @@ body.dragging .drop-overlay {
 
 /* ---------- Tone themes (dark) ---------- */
 
-[data-theme="dark"][data-tone="blue"] {
+html[data-theme="dark"][data-tone="blue"] {
   --bg: #151b26;
   --ink: #d6dde9;
   --ink-strong: #f0f5fb;
@@ -1323,7 +1323,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(122, 160, 217, 0.2);
 }
 
-[data-theme="dark"][data-tone="green"] {
+html[data-theme="dark"][data-tone="green"] {
   --bg: #141a11;
   --ink: #d7e3d1;
   --ink-strong: #f0f6ec;
@@ -1352,7 +1352,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(131, 185, 111, 0.2);
 }
 
-[data-theme="dark"][data-tone="red"] {
+html[data-theme="dark"][data-tone="red"] {
   --bg: #1f1412;
   --ink: #e8d6d1;
   --ink-strong: #f8ece9;
@@ -1381,7 +1381,7 @@ body.dragging .drop-overlay {
   --save-dot-ring: rgba(217, 139, 111, 0.2);
 }
 
-[data-theme="dark"][data-tone="white"] {
+html[data-theme="dark"][data-tone="white"] {
   --bg: #191919;
   --ink: #e4e4e4;
   --ink-strong: #f7f7f7;
@@ -1421,7 +1421,7 @@ body.dragging .drop-overlay {
 /* ---------- Style themes ---------- */
 
 /* Cyberpunk — neon on near-black, glow shadows, scanlines. */
-[data-style="cyberpunk"] {
+html[data-style="cyberpunk"] {
   color-scheme: dark;
   --bg: #0a0d12;
   --ink: #c9d6e3;
@@ -1500,7 +1500,7 @@ body.dragging .drop-overlay {
 }
 
 /* Windows 98 — silver bevels, teal desktop, hard edges. */
-[data-style="win98"] {
+html[data-style="win98"] {
   color-scheme: light;
   --bg: #008080;
   --ink: #000;
@@ -1646,7 +1646,7 @@ body.dragging .drop-overlay {
 }
 
 /* Paper — ruled notebook lines, serif type, warm paper. */
-[data-style="paper"] {
+html[data-style="paper"] {
   --bg: #f6f1e3;
   --ink: #3b3a36;
   --ink-strong: #26241f;
@@ -1708,7 +1708,7 @@ body.dragging .drop-overlay {
 }
 
 /* Console hacker — green phosphor on black, monospace, scanlines. */
-[data-style="console"] {
+html[data-style="console"] {
   color-scheme: dark;
   --bg: #050b05;
   --ink: #3cff6e;
@@ -1790,88 +1790,88 @@ body.dragging .drop-overlay {
 
 /* ---------- Logo tint per theme ---------- */
 
-[data-theme="dark"] {
+html[data-theme="dark"] {
   --logo-a: #e8a558;
   --logo-b: #b06f24;
   --logo-ink: #fff8ec;
   --logo-shadow: rgba(0, 0, 0, 0.5);
 }
 
-[data-tone="blue"] {
+html[data-tone="blue"] {
   --logo-a: #8ab4f0;
   --logo-b: #2f6fd1;
   --logo-ink: #f5f9ff;
   --logo-shadow: rgba(31, 95, 193, 0.5);
 }
 
-[data-tone="green"] {
+html[data-tone="green"] {
   --logo-a: #9ed488;
   --logo-b: #3e7a2e;
   --logo-ink: #f4faf0;
   --logo-shadow: rgba(62, 122, 46, 0.5);
 }
 
-[data-tone="red"] {
+html[data-tone="red"] {
   --logo-a: #f0a488;
   --logo-b: #c33b2b;
   --logo-ink: #fff8f5;
   --logo-shadow: rgba(195, 59, 43, 0.5);
 }
 
-[data-tone="white"] {
+html[data-tone="white"] {
   --logo-a: #e3e3e3;
   --logo-b: #8a8a8a;
   --logo-ink: #ffffff;
   --logo-shadow: rgba(0, 0, 0, 0.25);
 }
 
-[data-theme="dark"][data-tone="blue"] {
+html[data-theme="dark"][data-tone="blue"] {
   --logo-a: #5c9bf2;
   --logo-b: #1f4f9e;
   --logo-ink: #eaf3ff;
 }
 
-[data-theme="dark"][data-tone="green"] {
+html[data-theme="dark"][data-tone="green"] {
   --logo-a: #5cb848;
   --logo-b: #2c5c1e;
   --logo-ink: #eef8ea;
 }
 
-[data-theme="dark"][data-tone="red"] {
+html[data-theme="dark"][data-tone="red"] {
   --logo-a: #e07a5a;
   --logo-b: #9e2d20;
   --logo-ink: #fff2ee;
 }
 
-[data-theme="dark"][data-tone="white"] {
+html[data-theme="dark"][data-tone="white"] {
   --logo-a: #bdbdbd;
   --logo-b: #5a5a5a;
   --logo-ink: #f5f5f5;
 }
 
 /* Styles override tones for the logo (declared last on purpose). */
-[data-style="cyberpunk"] {
+html[data-style="cyberpunk"] {
   --logo-a: #00e5ff;
   --logo-b: #ff2bd6;
   --logo-ink: #041016;
   --logo-shadow: rgba(0, 229, 255, 0.45);
 }
 
-[data-style="win98"] {
+html[data-style="win98"] {
   --logo-a: #1084d0;
   --logo-b: #000080;
   --logo-ink: #ffffff;
   --logo-shadow: rgba(0, 0, 0, 0.4);
 }
 
-[data-style="paper"] {
+html[data-style="paper"] {
   --logo-a: #d9b98a;
   --logo-b: #9c6b2f;
   --logo-ink: #fdf9f0;
   --logo-shadow: rgba(107, 97, 77, 0.4);
 }
 
-[data-style="console"] {
+html[data-style="console"] {
   --logo-a: #1a7a33;
   --logo-b: #051408;
   --logo-ink: #33ff66;
